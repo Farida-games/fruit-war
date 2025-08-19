@@ -309,8 +309,13 @@ body {
     
     <div id="startScreen" class="container screen active">
         <h1>🍎 حرب الفواكه 🍊</h1>
-        <h2>مع فريدة</h2>
-        <textarea id="player-names" placeholder="أضف أسماء اللاعبين هنا، كل اسم في سطر جديد..."></textarea>
+        <h2 style="color:#e488b6; font-family:'Cairo',sans-serif; font-size:2em; text-align:center; margin-bottom:28px;">
+  مع فريدة
+</h2>
+<div style="text-align:center; margin-bottom:18px;">
+  <img src="farida.png" alt="Farida" style="width:250px; max-width:80%; border-radius:16px; box-shadow:0 3px 12px #e9dae6;">
+</div>
+<textarea id="player-names" placeholder="أضف أسماء اللاعبين هنا، كل اسم في سطر جديد..."></textarea>
         <div>
             <button onclick="savePlayersList()" class="btn btn-save"><i class="fas fa-save"></i> حفظ</button>
             <button onclick="loadPlayersList()" class="btn btn-load"><i class="fas fa-download"></i> تحميل</button>
@@ -361,7 +366,7 @@ body {
     </div>
     
     <div id="toast"></div>
-    <audio id="music-bg" src="game.mp3" loop></audio>
+    <audio id="music-bg" src="Game.mp3" loop></audio>
     <audio id="sound-start" src="gamestart.mp3" preload="auto"></audio>
     <audio id="sound-click" src="squish.mp3" preload="auto"></audio>
     <audio id="sound-elimination" src="exclusion.mp3" preload="auto"></audio>
@@ -821,7 +826,7 @@ if (player === "فريدة") {
 } else if (winnerName === "فريدة") {
     document.getElementById('winner-name').innerHTML = `<img src="farida.png" alt="فريدة" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${winnerName}`;
 } else if (winnerName === "احمد") {
-    document.getElementById('winner-name').innerHTML = `<img src="player1.png" alt="احمد" style="width:450px;height:250px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${winnerName}`;
+    document.getElementById('winner-name').innerHTML = `<img src="player1.png" alt="احمد" style="width:250px;height:250px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${winnerName}`;
 } else {
     document.getElementById('winner-name').textContent = winnerName;
 }
