@@ -565,7 +565,7 @@ body {
             document.getElementById('sound-shield')?.play();
             specialFruitsState.shield.used = true; // Mark as used
             const savedPlayer = shieldAssignment.player;
-            showEliminationPopup( `${savedPlayer} نجا هذه المرة بفضل الحصانه!`, '🎉 حصانه عشوائي 🌟', 'shield' );
+            showEliminationPopup( `${savedPlayer} نجا هذه المرة بفضل الحصانه!`, '🎉 حصانه عشوائي 🎁', 'shield' );
             return true; // Reshuffle needed after a special fruit
         }
         function handleGoldenFruit(assignment) {
@@ -826,7 +826,7 @@ if (player === "فريدة") {
 } else if (winnerName === "فريدة") {
     document.getElementById('winner-name').innerHTML = `<img src="farida.png" alt="فريدة" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${winnerName}`;
 } else if (winnerName === "احمد") {
-    document.getElementById('winner-name').innerHTML = `<img src="player1.png" alt="احمد" style="width:250px;height:250px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${winnerName}`;
+    document.getElementById('winner-name').innerHTML = `<img src="player1.png" alt="احمد" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${winnerName}`;
 } else {
     document.getElementById('winner-name').textContent = winnerName;
 }
