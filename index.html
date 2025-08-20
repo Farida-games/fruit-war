@@ -384,7 +384,7 @@ body {
             'خوخ 🍑', 'كمثرى 🍐', 'ليمون 🍋', 'كيوي 🥝', 'مانجو 🥭', 'أفوكادو 🥑', 'جوز الهند 🥥', 'توت أزرق 🫐',
             'بروكلي 🥦', 'جزر 🥕', 'ذرة 🌽', 'طماطم 🍅', 'خيار 🥒', 'باذنجان 🍆', 'فلفل 🌶️', 'بطاطس 🥔',
             'بصل 🧅', 'ثوم 🧄', 'فطر 🍄', 'فلفل أخضر 🫑', 'خس 🥬', 'يقطين 🎃', 'زيتون 🫒', 'شمام 🍈',
-            'فول سوداني 🥜', 'كستناء 🌰', 'فلفل حار 🌶️', 'تفاح اخضر 🍏', 'بطاطا 🍠', 'تفاح 🍎', 'شوكولاتة 🍫', 'قهوة ☕', 'شاي اخضر 🍵'
+            'فول سوداني 🥜', 'كستناء 🌰', 'فلفل حار 🌶️', 'زنجبيل 🫚', 'بطاطا 🍠', 'تفاح 🍎'
         ];
         let activePlayers = [], eliminatedPlayers = [], fruitAssignments = [], countdownInterval = null;
         let gameEnded = false, musicStarted = false;
@@ -677,7 +677,7 @@ body {
                     messageEl.innerHTML = `<img src="farida.png" alt="فريدة" style="width:220px;height:220px;border-radius:50%;margin-bottom:12px;object-fit:cover;"><br>${message}`;
                 } else if (message.includes('اسماء')) {
                     messageEl.innerHTML = `<img src="asmma.png" alt="اسماء" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${message}`;
-                } else if (message.includes('احمد') && !message.includes('احمد2') && !message.includes('احمد علي')) {
+                } else if (message === 'احمد نجا هذه المرة بفضل الحصانه!') {
                     messageEl.innerHTML = `<img src="player1.png" alt="احمد" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${message}`;
                 } else {
                     messageEl.innerHTML = message;
