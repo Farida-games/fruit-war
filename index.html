@@ -663,21 +663,34 @@ body {
         function showEliminationPopup(message, title, type = 'elimination') {
             if (type === 'shield' || type === 'golden') { document.getElementById('sound-shield')?.play(); }
             else if (type !== 'bomb' && type !== 'generous') { document.getElementById('sound-elimination')?.play(); }
-            
+
             const popup = document.getElementById('elimination-popup');
             const content = document.getElementById('popup-content');
             const titleEl = document.getElementById('popup-title-text');
             const messageEl = document.getElementById('popup-message');
             titleEl.textContent = title;
-            if (message.includes('فريدة')) {
-    messageEl.innerHTML = `<img src="farida.png" alt="فريدة" style="width:220px;height:220px;border-radius:50%;margin-bottom:12px;object-fit:cover;"><br>${message}`;
-} else if (message.includes('اسماء')) {
-    messageEl.innerHTML = `<img src="asmma.png" alt="اسماء" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${message}`;
-} else if (message.includes('احمد')) {
-    messageEl.innerHTML = `<img src="player1.png" alt="احمد" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${message}`;
-} else {
-    messageEl.innerHTML = message;
-}
+
+            // For shield type, check if message contains specific player names
+            // Fixed: Added exclamation mark to match actual message format from handleShield
+            if (type === 'shield' && message.includes('نجا هذه المرة بفضل الحصانه!')) {
+                if (message.includes('فريدة')) {
+                    messageEl.innerHTML = `<img src="farida.png" alt="فريدة" style="width:220px;height:220px;border-radius:50%;margin-bottom:12px;object-fit:cover;"><br>${message}`;
+                } else if (message.includes('اسماء')) {
+                    messageEl.innerHTML = `<img src="asmma.png" alt="اسماء" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${message}`;
+                } else if (message.includes('احمد') && !message.includes('احمد2') && !message.includes('احمد علي')) {
+                    messageEl.innerHTML = `<img src="player1.png" alt="احمد" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${message}`;
+                } else {
+                    messageEl.innerHTML = message;
+                }
+            } else if (message === 'فريدة') {
+                messageEl.innerHTML = `<img src="farida.png" alt="فريدة" style="width:220px;height:220px;border-radius:50%;margin-bottom:12px;object-fit:cover;"><br>${message}`;
+            } else if (message === 'اسماء') {
+                messageEl.innerHTML = `<img src="asmma.png" alt="اسماء" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${message}`;
+            } else if (message === 'احمد') {
+                messageEl.innerHTML = `<img src="player1.png" alt="احمد" style="width:220px;height:220px;border-radius:50%;margin-bottom:20px;object-fit:cover;"><br>${message}`;
+            } else {
+                messageEl.innerHTML = message;
+            }
             content.className = `popup-content ${type}`;
             popup.classList.add('visible');
         }
