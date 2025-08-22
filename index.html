@@ -263,7 +263,93 @@
         .btn-plant-bomb:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4); background: linear-gradient(45deg, #c0392b, #a93226); }
         .btn-plant-bomb:disabled { background: #7f8c8d; cursor: not-allowed; transform: none; box-shadow: none; }
         .bomb-status { font-size: 0.9rem; color: #ecf0f1; margin-top: 8px; font-weight: 600; }
-    </style>
+    
+        /* تصميم مفتاح الحصانة العشوائية */
+        .immunity-toggle-container {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 15px;
+            background: rgba(155, 89, 182, 0.1);
+            padding: 8px 12px;
+            border-radius: 25px;
+            border: 2px solid var(--btn-add-bg);
+            transition: all 0.3s ease;
+        }
+
+        .immunity-toggle-container:hover {
+            background: rgba(155, 89, 182, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .immunity-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--btn-add-bg);
+            margin-right: 8px;
+            user-select: none;
+        }
+
+        .immunity-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .immunity-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .immunity-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .immunity-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .immunity-slider {
+            background: var(--btn-add-bg);
+        }
+
+        input:checked + .immunity-slider:before {
+            transform: translateX(26px);
+        }
+
+        .immunity-slider:after {
+            content: '🔄';
+            position: absolute;
+            right: 4px;
+            top: 2px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        input:checked + .immunity-slider:after {
+            content: '🔄';
+            left: 4px;
+            right: auto;
+            opacity: 1;
+        }
+</style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 body {
@@ -301,6 +387,45 @@ body {
   margin-top: 80px;
   text-align:center;
 }
+
+
+        /* تحسين للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .immunity-toggle-container {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 15px;
+            background: rgba(155, 89, 182, 0.1);
+            padding: 8px 12px;
+            border-radius: 25px;
+            border: 2px solid var(--btn-add-bg);
+            transition: all 0.3s ease;
+        }
+
+            .immunity-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--btn-add-bg);
+            margin-right: 8px;
+            user-select: none;
+        }
+
+            .immunity-switch {
+                width: 40px;
+                height: 20px;
+            }
+
+            .immunity-slider:before {
+                height: 14px;
+                width: 14px;
+                left: 3px;
+                bottom: 3px;
+            }
+
+            input:checked + .immunity-slider:before {
+                transform: translateX(20px);
+            }
+        }
 </style>
 
 </head>
@@ -326,6 +451,13 @@ body {
         <div class="game-info">
             <div class="active-players" id="active-players-count"></div>
             <button class="btn btn-add-player" onclick="addNewPlayer()">➕ إضافة لاعب</button>
+                <div class="immunity-toggle-container">
+                    <span class="immunity-label">حصانة عشوائية</span>
+                    <label class="immunity-switch">
+                        <input type="checkbox" id="immunity-toggle" onchange="toggleImmunity()">
+                        <span class="immunity-slider"></span>
+                    </label>
+                </div>
             <div id="countdown-timer"></div>
             <div class="bomb-controls" id="bomb-controls" style="display: none;">
                 <button id="music-control-btn" class="btn-plant-bomb" onclick="toggleBackgroundMusic()">
@@ -392,6 +524,79 @@ body {
         
         // --- MODIFIED: New state management for special fruits ---
         let specialFruitsAreEnabled = false;
+
+        // متغير للتحكم في تفعيل الحصانة العشوائية
+        let randomImmunityEnabled = false;
+
+        // دالة تبديل حالة الحصانة العشوائية
+        function toggleImmunity() {
+            const toggle = document.getElementById('immunity-toggle');
+            randomImmunityEnabled = toggle.checked;
+
+            // إظهار رسالة توضيحية
+            const status = randomImmunityEnabled ? 'مُفعلة' : 'مُعطلة';
+            showToast(`الحصانة العشوائية ${status}`);
+
+            // تحديث الحصانة في الدور الحالي بدون تغيير الفواكه
+            const gameScreen = document.getElementById('gameScreen');
+            if (gameScreen && gameScreen.classList.contains('active') && !gameEnded && activePlayers.length > 0) {
+                updateImmunityInCurrentRound();
+            }
+        }
+        // دالة جديدة للتحكم في الحصانة بدون تغيير الفواكه الحالية
+        function updateImmunityInCurrentRound() {
+            if (!specialFruitsAreEnabled || gameEnded || activePlayers.length === 0) {
+                return;
+            }
+
+            const availableNormalAssignments = fruitAssignments.filter(a => a.type === 'normal' && !a.used);
+            const currentShieldAssignment = fruitAssignments.find(a => a.type === 'shield' && !a.used);
+
+            if (randomImmunityEnabled) {
+                // إذا كانت الحصانة مفعلة ولا توجد فاكهة حصانة حالياً
+                if (!currentShieldAssignment && !specialFruitsState.shield.used && availableNormalAssignments.length > 0) {
+                    // تحويل إحدى الفواكه العادية إلى فاكهة حصانة
+                    const randomIndex = Math.floor(Math.random() * availableNormalAssignments.length);
+                    const spotToConvert = availableNormalAssignments[randomIndex];
+                    spotToConvert.type = 'shield';
+                }
+            } else {
+                // إذا كانت الحصانة معطلة وتوجد فاكهة حصانة حالياً
+                if (currentShieldAssignment) {
+                    // تحويل فاكهة الحصانة إلى فاكهة عادية
+                    currentShieldAssignment.type = 'normal';
+                }
+            }
+
+            // إعادة رسم الفواكه فقط (بدون إعادة خلط)
+            redrawFruits();
+        }
+
+        // دالة لإعادة رسم الفواكه في نفس أماكنها
+        function redrawFruits() {
+            const fruitGrid = document.getElementById('fruit-grid');
+            fruitGrid.innerHTML = '';
+
+            fruitAssignments.forEach(assignment => {
+                const fruitDiv = document.createElement('div');
+                fruitDiv.id = assignment.id;
+                fruitDiv.className = 'fruit-item';
+
+                // إضافة الكلاس المناسب إذا كانت الفاكهة مستخدمة
+                if (assignment.used) {
+                    fruitDiv.classList.add('used');
+                }
+
+                const parts = assignment.fruitName.split(' ');
+                const emoji = parts.pop();
+                const name = parts.join(' ');
+
+                fruitDiv.innerHTML = `<div class="fruit-emoji">${emoji}</div><div class="fruit-name">${name}</div>`;
+
+                fruitDiv.onclick = () => selectFruit(assignment);
+                fruitGrid.appendChild(fruitDiv);
+            });
+        }
         let specialFruitsState = {
             shield: { used: false }
         };
@@ -445,6 +650,11 @@ body {
                 const availableNormalAssignments = fruitAssignments.filter(a => a.type === 'normal');
                 
                 Object.keys(specialFruitsState).forEach(fruitType => {
+                    // تحقق من تفعيل الحصانة العشوائية للفواكه من نوع shield
+                    if (fruitType === 'shield' && !randomImmunityEnabled) {
+                        return; // تجاهل فاكهة الحصانة إذا كانت معطلة
+                    }
+
                     // If the fruit hasn't been used and there's a spot for it
                     if (!specialFruitsState[fruitType].used && availableNormalAssignments.length > 0) {
                         // Pick a random available spot and convert it
@@ -961,6 +1171,14 @@ if (player === "فريدة") {
 
         // Call initialize function when page loads
         document.addEventListener('DOMContentLoaded', initializeMusicControl);
-    </script>
+    
+        // تحديث حالة المفتاح عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('immunity-toggle');
+            if (toggle) {
+                randomImmunityEnabled = toggle.checked;
+            }
+        });
+</script>
 </body>
 </html>
