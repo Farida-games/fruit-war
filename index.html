@@ -265,90 +265,12 @@
         .bomb-status { font-size: 0.9rem; color: #ecf0f1; margin-top: 8px; font-weight: 600; }
     
         /* تصميم مفتاح الحصانة العشوائية */
-        .immunity-toggle-container {
-            display: inline-flex;
-            align-items: center;
-            margin-left: 15px;
-            background: rgba(155, 89, 182, 0.1);
-            padding: 8px 12px;
-            border-radius: 25px;
-            border: 2px solid var(--btn-add-bg);
-            transition: all 0.3s ease;
-        }
 
-        .immunity-toggle-container:hover {
-            background: rgba(155, 89, 182, 0.2);
-            transform: translateY(-2px);
-        }
+        input:checked + 
 
-        .immunity-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--btn-add-bg);
-            margin-right: 8px;
-            user-select: none;
-        }
+        input:checked + 
 
-        .immunity-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .immunity-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .immunity-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #ccc;
-            transition: 0.4s;
-            border-radius: 24px;
-        }
-
-        .immunity-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .immunity-slider {
-            background: var(--btn-add-bg);
-        }
-
-        input:checked + .immunity-slider:before {
-            transform: translateX(26px);
-        }
-
-        .immunity-slider:after {
-            content: '🔄';
-            position: absolute;
-            right: 4px;
-            top: 2px;
-            font-size: 12px;
-            opacity: 0.7;
-        }
-
-        input:checked + .immunity-slider:after {
-            content: '🔄';
-            left: 4px;
-            right: auto;
-            opacity: 1;
-        }
+        input:checked + 
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -388,50 +310,102 @@ body {
   text-align:center;
 }
 
-
         /* تحسين للشاشات الصغيرة */
         @media (max-width: 768px) {
-            .immunity-toggle-container {
+
+            input:checked + 
+        }
+
+        /* === زر الحصانة العشوائية === */
+        .immunity-toggle-container {
             display: inline-flex;
             align-items: center;
             margin-left: 15px;
             background: rgba(155, 89, 182, 0.1);
-            padding: 8px 12px;
+            padding: 10px 15px;
             border-radius: 25px;
             border: 2px solid var(--btn-add-bg);
             transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(155, 89, 182, 0.15);
         }
-
-            .immunity-label {
+        .immunity-toggle-container:hover {
+            background: rgba(155, 89, 182, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.25);
+        }
+        .immunity-label {
             font-size: 14px;
             font-weight: 600;
             color: var(--btn-add-bg);
-            margin-right: 8px;
+            margin-right: 10px;
             user-select: none;
         }
-
-            .immunity-switch {
-                width: 40px;
-                height: 20px;
-            }
-
-            .immunity-slider:before {
-                height: 14px;
-                width: 14px;
-                left: 3px;
-                bottom: 3px;
-            }
-
-            input:checked + .immunity-slider:before {
-                transform: translateX(20px);
-            }
+        .immunity-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
         }
-</style>
+        .immunity-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .immunity-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #bdc3c7;
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+        .immunity-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input:checked + .immunity-slider {
+            background: var(--btn-add-bg);
+        }
+        input:checked + .immunity-slider:before {
+            transform: translateX(24px);
+        }
+        .immunity-slider:after {
+            content: '';
+            position: absolute;
+            right: 5px;
+            top: 3px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        input:checked + .immunity-slider:after {
+            content: '';
+            left: 5px;
+            right: auto;
+            opacity: 1;
+        }
+        @media (max-width: 768px) {
+            .immunity-toggle-container { margin-left: 8px; padding: 8px 12px; flex-direction: column; text-align: center; }
+            .immunity-label { margin-right: 0; margin-bottom: 4px; font-size: 12px; }
+            .immunity-switch { width: 42px; height: 22px; }
+            .immunity-slider:before { height: 16px; width: 16px; }
+            input:checked + .immunity-slider:before { transform: translateX(20px); }
+        }
+        </style>
 
 </head>
 <body>
-    
-    
+
     <div id="startScreen" class="container screen active">
         <h1>🍎 حرب الفواكه 🍊</h1>
         <h2 style="color:#e488b6; font-family:'Cairo',sans-serif; font-size:2em; text-align:center; margin-bottom:28px;">
@@ -531,11 +505,17 @@ body {
         // دالة تبديل حالة الحصانة العشوائية
         function toggleImmunity() {
             const toggle = document.getElementById('immunity-toggle');
+            const label = document.querySelector('.immunity-label');
             randomImmunityEnabled = toggle.checked;
 
-            // إظهار رسالة توضيحية
-            const status = randomImmunityEnabled ? 'مُفعلة' : 'مُعطلة';
-            showToast(`الحصانة العشوائية ${status}`);
+            // تحديث نص الحصانة
+            if (randomImmunityEnabled) {
+                label.textContent = 'الحصانة العشوائية مُفعلة';
+                showToast('تم تفعيل الحصانة العشوائية ✅', 'success');
+            } else {
+                label.textContent = 'الحصانة العشوائية معطلة';
+                showToast('تم تعطيل الحصانة العشوائية ❌', 'info');
+            }
 
             // تحديث الحصانة في الدور الحالي بدون تغيير الفواكه
             const gameScreen = document.getElementById('gameScreen');
@@ -1018,7 +998,6 @@ if (player === "فريدة") {
                 showToast(`أهلاً باللاعب الجديد ${cleanName}!`);
                 setupGame();
             }
-
         }
         function updateBombControls() {
             const bombControls = document.getElementById('bomb-controls');
@@ -1125,7 +1104,6 @@ if (player === "فريدة") {
             toast.classList.add('show');
             setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
-    
 
         // Music control variables and function
         let isMusicPlaying = false;
