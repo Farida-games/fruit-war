@@ -1157,6 +1157,289 @@ if (player === "فريدة") {
                 randomImmunityEnabled = toggle.checked;
             }
         });
-</script>
+
+
+        // ============================================
+        // نظام الصوت المحسن للتوافق مع iOS
+        // ============================================
+
+        class EnhancedAudioSystem {
+            constructor() {
+                this.audioContext = null;
+                this.audioBuffers = {};
+                this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                this.silentAudio = null;
+                this.audioInitialized = false;
+                this.soundEnabled = true;
+
+                this.init();
+            }
+
+            async init() {
+                // إنشاء AudioContext
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Web Audio API غير مدعوم، سيتم استخدام HTML5 Audio');
+                    return;
+                }
+
+                // تحضير الملف الصامت لـ iOS
+                if (this.isIOS) {
+                    this.createSilentAudio();
+                    this.showIOSNotification();
+                }
+
+                // تحميل جميع الأصوات
+                await this.loadAllSounds();
+
+                // إضافة مستمعات الأحداث
+                this.addEventListeners();
+            }
+
+            createSilentAudio() {
+                this.silentAudio = document.createElement('audio');
+                this.silentAudio.src = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAAFE=';
+                this.silentAudio.loop = true;
+                this.silentAudio.volume = 0.01;
+                this.silentAudio.load();
+            }
+
+            showIOSNotification() {
+                // إنشاء إشعار للمستخدمين iOS
+                const notification = document.createElement('div');
+                notification.id = 'ios-audio-notification';
+                notification.innerHTML = `
+                    <div style="position: fixed; top: 10px; right: 10px; background: rgba(255,193,7,0.95); 
+                                color: #000; padding: 15px; border-radius: 10px; z-index: 10000; 
+                                max-width: 300px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                                font-family: 'Changa', sans-serif; text-align: center;">
+                        <div style="font-size: 18px; margin-bottom: 10px;">🔊</div>
+                        <div style="font-size: 14px; margin-bottom: 10px;">
+                            للاستمتاع بالأصوات الكاملة:<br>
+                            • تأكد من إيقاف الوضع الصامت<br>
+                            • اضغط الزر أدناه لتفعيل الصوت
+                        </div>
+                        <button onclick="audioSystem.enableAudio()" 
+                                style="background: #28a745; color: white; border: none; 
+                                       padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+                            تفعيل الصوت
+                        </button>
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="background: #dc3545; color: white; border: none; 
+                                       padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-right: 5px;">
+                            إغلاق
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+            }
+
+            async enableAudio() {
+                if (this.isIOS && this.silentAudio) {
+                    try {
+                        await this.silentAudio.play();
+                        console.log('تم تفعيل قناة الصوت لـ iOS');
+                    } catch (e) {
+                        console.log('فشل في تشغيل الملف الصامت:', e);
+                    }
+                }
+
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    await this.audioContext.resume();
+                }
+
+                this.audioInitialized = true;
+
+                // إزالة الإشعار
+                const notification = document.getElementById('ios-audio-notification');
+                if (notification) {
+                    notification.remove();
+                }
+
+                // عرض رسالة تأكيد
+                this.showMessage('تم تفعيل الصوت بنجاح! 🔊', 'success');
+            }
+
+            async loadAllSounds() {
+                const sounds = {
+                    'win': 'win.mp3',
+                    'start': 'gamestart.mp3',
+                    'click': 'squish.mp3',
+                    'elimination': 'exclusion.mp3',
+                    'bomb': 'bomb.mp3',
+                    'shield': 'protect.mp3',
+                    'countdown': 'countdown.mp3',
+                    'readd': 'return.mp3',
+                    'golden': 'golden.mp3',
+                    'generous': 'generous.mp3'
+                };
+
+                for (const [name, file] of Object.entries(sounds)) {
+                    try {
+                        await this.loadSound(name, file);
+                    } catch (e) {
+                        console.log(`فشل في تحميل صوت ${name}:`, e);
+                    }
+                }
+            }
+
+            async loadSound(name, url) {
+                try {
+                    const response = await fetch(url);
+                    const arrayBuffer = await response.arrayBuffer();
+                    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+                    this.audioBuffers[name] = audioBuffer;
+                    console.log(`تم تحميل صوت ${name}`);
+                } catch (e) {
+                    console.log(`خطأ في تحميل ${name}:`, e);
+                }
+            }
+
+            addEventListeners() {
+                // إضافة مستمع للتفاعل الأول مع الصفحة
+                const enableAudioOnFirstClick = () => {
+                    this.enableAudio();
+                    document.removeEventListener('click', enableAudioOnFirstClick);
+                    document.removeEventListener('touchstart', enableAudioOnFirstClick);
+                };
+
+                document.addEventListener('click', enableAudioOnFirstClick, { once: true });
+                document.addEventListener('touchstart', enableAudioOnFirstClick, { once: true });
+            }
+
+            playSound(soundName, volume = 1.0) {
+                if (!this.soundEnabled) return;
+
+                // استخدام Web Audio API إذا كان متاحاً
+                if (this.audioContext && this.audioBuffers[soundName]) {
+                    this.playWithWebAudio(soundName, volume);
+                } else {
+                    // العودة لـ HTML5 Audio
+                    this.playWithHTML5Audio(soundName, volume);
+                }
+            }
+
+            playWithWebAudio(soundName, volume) {
+                try {
+                    if (this.audioContext.state === 'suspended') {
+                        this.audioContext.resume();
+                    }
+
+                    const source = this.audioContext.createBufferSource();
+                    const gainNode = this.audioContext.createGain();
+
+                    source.buffer = this.audioBuffers[soundName];
+                    gainNode.gain.value = volume;
+
+                    source.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+
+                    source.start(0);
+
+                    // خاص بـ iOS: تشغيل الملف الصامت في الخلفية
+                    if (this.isIOS && this.silentAudio && this.silentAudio.paused) {
+                        this.silentAudio.play().catch(e => console.log('Silent audio play failed:', e));
+                    }
+
+                } catch (e) {
+                    console.log(`خطأ في تشغيل ${soundName} بـ Web Audio:`, e);
+                    this.playWithHTML5Audio(soundName, volume);
+                }
+            }
+
+            playWithHTML5Audio(soundName, volume) {
+                try {
+                    const audioElement = document.getElementById(`sound-${soundName}`);
+                    if (audioElement) {
+                        audioElement.volume = volume;
+                        audioElement.play().catch(e => {
+                            console.log(`خطأ في تشغيل ${soundName}:`, e);
+                            if (this.isIOS) {
+                                this.showMessage('قم بتفعيل الصوت أولاً 🔊', 'warning');
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.log(`خطأ في HTML5 Audio لـ ${soundName}:`, e);
+                }
+            }
+
+            showMessage(text, type = 'info') {
+                const message = document.createElement('div');
+                const colors = {
+                    success: '#28a745',
+                    warning: '#ffc107',
+                    error: '#dc3545',
+                    info: '#17a2b8'
+                };
+
+                message.style.cssText = `
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                    background: ${colors[type]}; color: white; padding: 15px 25px;
+                    border-radius: 10px; z-index: 10001; font-family: 'Changa', sans-serif;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center;
+                `;
+                message.textContent = text;
+
+                document.body.appendChild(message);
+                setTimeout(() => message.remove(), 3000);
+            }
+
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                this.showMessage(this.soundEnabled ? 'تم تشغيل الصوت 🔊' : 'تم كتم الصوت 🔇', 
+                               this.soundEnabled ? 'success' : 'warning');
+                return this.soundEnabled;
+            }
+        }
+
+        // إنشاء نظام الصوت المحسن
+        const audioSystem = new EnhancedAudioSystem();
+
+        // تحديث الدوال الموجودة لاستخدام النظام الجديد
+        const originalShowWinner = showWinner;
+        showWinner = function(winnerName) {
+            audioSystem.playSound('win', 0.8);
+            return originalShowWinner(winnerName);
+        };
+
+        // إضافة زر التحكم بالصوت في الواجهة
+        document.addEventListener('DOMContentLoaded', function() {
+            const soundToggle = document.createElement('button');
+            soundToggle.innerHTML = '🔊';
+            soundToggle.style.cssText = `
+                position: fixed; top: 10px; left: 10px; z-index: 1000;
+                background: rgba(0,0,0,0.7); color: white; border: none;
+                width: 50px; height: 50px; border-radius: 25px; font-size: 20px;
+                cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            `;
+            soundToggle.onclick = function() {
+                const enabled = audioSystem.toggleSound();
+                this.innerHTML = enabled ? '🔊' : '🔇';
+            };
+            document.body.appendChild(soundToggle);
+        });
+
+        // تحديث جميع استدعاءات تشغيل الأصوات الأخرى
+        document.addEventListener('DOMContentLoaded', function() {
+            // استبدال جميع استدعاءات play() القديمة
+            const originalGetElementById = document.getElementById;
+            document.getElementById = function(id) {
+                const element = originalGetElementById.call(this, id);
+                if (element && element.tagName === 'AUDIO') {
+                    const originalPlay = element.play;
+                    element.play = function() {
+                        const soundName = id.replace('sound-', '');
+                        audioSystem.playSound(soundName);
+                        return Promise.resolve();
+                    };
+                }
+                return element;
+            };
+        });
+
+
+    </script>
 </body>
 </html>
