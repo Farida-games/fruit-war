@@ -820,8 +820,7 @@ body {
             updateGameInfo(); 
             updateEliminatedList();
             updateActivePlayersList();
-            // منع بدء العد التنازلي إذا كانت اللعبة قد انتهت أو إذا كان العد التنازلي نشطاً بالفعل
-            if (activePlayers.length === 1 && !countdownInterval && !gameEnded) {
+            if (activePlayers.length === 1 && !countdownInterval) {
                 startCountdown();
             } else if (activePlayers.length <= 0) {
                 setTimeout(() => showWinner('لا يوجد فائز!'), 1000);
@@ -830,6 +829,7 @@ body {
         function stopCountdown() {
             const countdownSound = document.getElementById('sound-countdown');
             if (countdownSound) { countdownSound.pause(); countdownSound.currentTime = 0; }
+                countdownSound.load();         // إعادة تحميل العنصر - يوقف الـ loop نهائياً!
             if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
             const timerElement = document.getElementById('countdown-timer');
             if (timerElement) timerElement.style.display = 'none';
@@ -959,6 +959,8 @@ if (player === "فريدة") {
         function reAddPlayer(playerName, silent = false) {
             if (eliminatedPlayers.includes(playerName)) {
                 if (!silent) document.getElementById('sound-re-add')?.play();
+                console.log("توقيف التايمر قبل إرجاع اللاعب");
+                stopCountdown();
                 stopCountdown();
                 if (gameEnded) {
                     gameEnded = false;
