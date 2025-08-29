@@ -817,51 +817,84 @@ body {
             }
         }
         function checkGameStatus() {
-            updateGameInfo(); 
+            console.log('📊 checkGameStatus() - فحص حالة اللعبة');
+            console.log(`👥 لاعبين نشطين: ${activePlayers.length}, interval: ${countdownInterval ? 'يعمل' : 'متوقف'}, gameEnded: ${gameEnded}`);
+            
+            updateGameInfo();
             updateEliminatedList();
             updateActivePlayersList();
+            
             // ✅ إضافة شرط !gameEnded لمنع بدء العد إذا انتهت اللعبة
             if (activePlayers.length === 1 && !countdownInterval && !gameEnded) {
-                console.log('🔔 بدء العد التنازلي - لاعب واحد متبقي');
+                console.log('🚨 بدء العد التنازلي - لاعب واحد متبقي');
                 startCountdown();
             } else if (activePlayers.length <= 0) {
+                console.log('😞 لا يوجد لاعبين - انتهاء اللعبة');
                 setTimeout(() => showWinner('لا يوجد فائز!'), 1000);
+            } else {
+                console.log('ℹ️ لا حاجة لبدء العد التنازلي');
             }
         }
         function stopCountdown() {
             console.log('🛑 إيقاف العد التنازلي');
+            
             const countdownSound = document.getElementById('sound-countdown');
             if (countdownSound) {
                 countdownSound.pause();
                 countdownSound.currentTime = 0;
                 countdownSound.load(); // إعادة تحميل لتوقيف الـ loop نهائياً
+                console.log('🔇 تم إيقاف صوت العد التنازلي');
             }
+            
             if (countdownInterval) {
                 clearInterval(countdownInterval);
                 countdownInterval = null;
-                console.log('✅ تم إلغاء interval العد التنازلي');
+                console.log('✅ تم إلغاء countdownInterval');
             }
+            
             const timerElement = document.getElementById('countdown-timer');
             if (timerElement) {
                 timerElement.style.display = 'none';
-                console.log('✅ تم إخفاء عنصر التايمر');
+                console.log('👁️ تم إخفاء عنصر التايمر');
             }
         }
         function startCountdown() {
-            document.getElementById('sound-countdown')?.play();
+            console.log('🚨 startCountdown() - بدء العد التنازلي');
+            
+            // إذا كان هناك countdown يعمل بالفعل، أوقفه أولاً
+            if (countdownInterval) {
+                console.log('⚠️ يوجد countdown يعمل بالفعل - إيقافه أولاً');
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
+            try {
+                document.getElementById('sound-countdown')?.play();
+            } catch (e) {
+                console.log('⚠️ تعذر تشغيل صوت العد التنازلي');
+            }
+            
             let timeLeft = 20;
             const timerElement = document.getElementById('countdown-timer');
             timerElement.style.display = 'block';
             const updateTimer = () => { timerElement.textContent = `⏰ ${timeLeft} ⏰`; };
             updateTimer();
+            
+            console.log('🔔 بدء عد تنازلي جديد...');
             countdownInterval = setInterval(() => {
-                timeLeft--; updateTimer();
+                timeLeft--;
+                updateTimer();
+                
                 if (timeLeft <= 0) {
+                    console.log('⏰ انتهى الوقت!');
                     stopCountdown();
                     if (activePlayers.length === 1) showWinner(activePlayers[0]);
                     else showWinner('لا يوجد فائز!');
                 }
-                if (activePlayers.length > 1) { stopCountdown(); }
+                if (activePlayers.length > 1) {
+                    console.log('👥 أكثر من لاعب - إيقاف العد');
+                    stopCountdown();
+                }
             }, 1000);
         }
         function showEliminationPopup(message, title, type = 'elimination') {
@@ -971,8 +1004,9 @@ if (player === "فريدة") {
         
         function reAddPlayer(playerName, silent = false) {
             console.log(`🔄 إرجاع اللاعب: ${playerName}`);
+            
             if (eliminatedPlayers.includes(playerName)) {
-                // 🎯 توقيف العد التنازلي فوراً
+                // 🎯 توقيف العد التنازلي فوراً قبل أي شيء آخر
                 console.log('🛑 توقيف العد التنازلي قبل إرجاع اللاعب');
                 stopCountdown();
                 
@@ -980,7 +1014,9 @@ if (player === "فريدة") {
                 if (!silent) {
                     const returnSound = document.getElementById('sound-re-add');
                     if (returnSound) {
-                        returnSound.play().catch(e => console.log('تعذر تشغيل صوت الإرجاع'));
+                        returnSound.play().catch(e => {
+                            console.log('⚠️ تعذر تشغيل صوت الإرجاع (لا يؤثر على عمل الوظيفة)');
+                        });
                     }
                 }
                 
@@ -1000,6 +1036,8 @@ if (player === "فريدة") {
                 
                 setupGame();
                 console.log(`✅ تم إرجاع ${playerName} بنجاح`);
+            } else {
+                console.log(`❌ اللاعب ${playerName} غير موجود في قائمة المقصيين`);
             }
         }
         function reAddOldestEliminatedPlayer() {
@@ -1028,20 +1066,28 @@ if (player === "فريدة") {
             }
         }
         function updateBombControls() {
-            const bombControls = document.getElementById('bomb-controls');
-            const plantButton = document.getElementById('plant-bomb-btn');
-            const bombStatus = document.getElementById('bomb-status');
-            if (activePlayers.length < 6 && !bombExploded) {
-                bombControls.style.display = 'block';
-                plantButton.disabled = false;
-                bombStatus.textContent = '';
-                bombAvailableForPlanting = true;
-            } else if (bombExploded) {
-                bombControls.style.display = 'block';
-                plantButton.disabled = !bombAvailableForPlanting;
-                bombStatus.textContent = bombAvailableForPlanting ? 'القنبلة متاحة للزرع الآن!' : 'تم استخدام ميزة زرع القنبلة.';
-            } else {
-                bombControls.style.display = 'none';
+            console.log('🔧 updateBombControls() - فحص آمن');
+            
+            try {
+                // تحقق من وجود العناصر المطلوبة
+                const bombButton = document.getElementById('btn-plant-bomb');
+                const bombExplodeButton = document.getElementById('btn-explode-bomb');
+                
+                // إذا العناصر مش موجودة، اخرج من الوظيفة
+                if (!bombButton || !bombExplodeButton) {
+                    console.log('⚠️ عناصر bomb controls غير موجودة - تجاهل التحديث');
+                    return;
+                }
+                
+                // تحديث العناصر بأمان
+                bombButton.disabled = !bombAvailableForPlanting;
+                bombExplodeButton.disabled = !bombExploded;
+                
+                console.log('✅ updateBombControls تمت بنجاح');
+                
+            } catch (error) {
+                console.error('❌ خطأ في updateBombControls:', error);
+                // لا تعيد استدعاء الوظيفة لمنع infinite loop
             }
         }
         
