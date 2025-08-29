@@ -855,43 +855,61 @@ body {
             }
         }
         function stopCountdown() {
-            console.log('🛑 FORCE STOP - إيقاف قسري للعد التنازلي');
+            console.log('🚨 RADICAL STOP - إيقاف راديكالي للعد التنازلي');
             
-            // إيقاف جميع intervals الممكنة (حل جذري)
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-                countdownInterval = null;
-                console.log('✅ تم إلغاء countdownInterval الأساسي');
+            // إيقاف راديكالي لجميع intervals الممكنة
+            try {
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+                
+                // إيقاف راديكالي لآلاف intervals
+                for (let i = 1; i < 50000; i++) {
+                    try { clearInterval(i); } catch(e) {}
+                }
+                
+                // إيقاف وتدمير جميع الأصوات المتعلقة بالعد التنازلي
+                const allAudios = document.querySelectorAll('audio');
+                allAudios.forEach(audio => {
+                    try {
+                        if (audio.id === 'sound-countdown' || audio.src.includes('countdown')) {
+                            audio.pause();
+                            audio.currentTime = 0;
+                            audio.volume = 0;
+                            audio.load();
+                            audio.muted = true;
+                            // تعطيل العنصر نهائياً
+                            audio.removeAttribute('src');
+                            audio.src = '';
+                            console.log('🔇 تم تدمير صوت العد التنازلي');
+                        }
+                    } catch(e) {}
+                });
+                
+                // إخفاء وتدمير عنصر التايمر
+                const timerElements = [
+                    document.getElementById('countdown-timer'),
+                    document.querySelector('#countdown-timer'),
+                    ...document.querySelectorAll('[id*="countdown"]'),
+                    ...document.querySelectorAll('[class*="countdown"]')
+                ];
+                
+                timerElements.forEach(element => {
+                    if (element) {
+                        element.style.display = 'none';
+                        element.style.visibility = 'hidden';
+                        element.textContent = '';
+                        element.innerHTML = '';
+                        element.remove(); // إزالة العنصر نهائياً
+                    }
+                });
+                
+                console.log('✅ تم التدمير الراديكالي للعد التنازلي');
+                
+            } catch (error) {
+                console.log('⚠️ خطأ في الإيقاف الراديكالي:', error);
             }
-            
-            // إيقاف أي intervals إضافية محتملة
-            for (let i = 1; i < 10000; i++) {
-                clearInterval(i);
-            }
-            
-            // إيقاف الصوت بقوة
-            const countdownSound = document.getElementById('sound-countdown');
-            if (countdownSound) {
-                countdownSound.pause();
-                countdownSound.currentTime = 0;
-                countdownSound.load();
-                countdownSound.volume = 0;  // كتم الصوت أيضاً
-                console.log('🔇 تم إيقاف وكتم صوت العد التنازلي بالقوة');
-            }
-            
-            // إخفاء التايمر
-            const timerElement = document.getElementById('countdown-timer');
-            if (timerElement) {
-                timerElement.style.display = 'none';
-                timerElement.textContent = '';
-                console.log('👁️ تم إخفاء ومسح محتوى التايمر');
-            }
-            
-            // تأكيد الإيقاف
-            setTimeout(() => {
-                if (countdownSound) countdownSound.pause();
-                console.log('🔒 تأكيد نهائي - العد التنازلي متوقف');
-            }, 100);
         }
         function startCountdown() {
             console.log('🚨 PROTECTED START - بدء محمي للعد التنازلي');
@@ -1063,83 +1081,77 @@ if (player === "فريدة") {
         }
         
         function reAddPlayer(playerName, silent = false) {
-            console.log(`🔄 FORCE RE-ADD - إرجاع قسري للاعب: ${playerName}`);
+            console.log(`🚨 RADICAL RE-ADD - إرجاع راديكالي للاعب: ${playerName}`);
             
             if (eliminatedPlayers.includes(playerName)) {
-                // 🎯 إيقاف قسري فوري للعد التنازلي
-                console.log('🚨 EMERGENCY STOP - إيقاف طارئ للعد التنازلي');
-                stopCountdown();
+                // إيقاف راديكالي فوري متعدد
+                console.log('🛑 EMERGENCY RADICAL STOP - إيقاف طارئ راديكالي');
                 
-                // إيقاف إضافي للتأكيد
-                setTimeout(() => {
-                    stopCountdown();
-                    console.log('🔒 إيقاف تأكيدي ثاني');
-                }, 50);
+                // استدعاء stopCountdown عدة مرات للتأكيد
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => stopCountdown(), i * 10);
+                }
+                
+                // إزالة فورية لجميع Toast messages
+                const toastElements = [
+                    document.getElementById('toast'),
+                    document.querySelector('#toast'),
+                    ...document.querySelectorAll('.toast'),
+                    ...document.querySelectorAll('[class*="toast"]'),
+                    ...document.querySelectorAll('[id*="toast"]')
+                ];
+                
+                toastElements.forEach(toast => {
+                    if (toast) {
+                        toast.style.display = 'none';
+                        toast.style.opacity = '0';
+                        toast.style.visibility = 'hidden';
+                        toast.classList.remove('show');
+                        toast.textContent = '';
+                        toast.innerHTML = '';
+                        console.log('🗑️ تم إزالة Toast message');
+                    }
+                });
                 
                 // تشغيل صوت الإرجاع بطريقة آمنة
                 if (!silent) {
-                    console.log('🔊 محاولة تشغيل صوت الإرجاع بأمان...');
+                    console.log('🔊 تشغيل صوت إرجاع آمن...');
                     
-                    // استراتيجية متعددة الطبقات لتشغيل الصوت
-                    const soundAttempts = [
-                        { id: 'sound-re-add', name: 'return' },
-                        { id: 'sound-click', name: 'click' },
-                        { id: 'sound-start', name: 'start' },
-                        { id: 'sound-shield', name: 'shield' }
-                    ];
-                    
+                    const soundOptions = ['sound-re-add', 'sound-click', 'sound-start'];
                     let soundPlayed = false;
-                    for (const sound of soundAttempts) {
+                    
+                    for (const soundId of soundOptions) {
                         if (soundPlayed) break;
                         
                         try {
-                            const audioElement = document.getElementById(sound.id);
-                            if (audioElement && !soundPlayed) {
-                                // إعدادات آمنة للصوت
-                                audioElement.currentTime = 0;
-                                audioElement.volume = 0.6;
+                            const audio = document.getElementById(soundId);
+                            if (audio && !soundPlayed) {
+                                audio.currentTime = 0;
+                                audio.volume = 0.6;
                                 
-                                // تشغيل محدود بوقت لمنع infinite loop
-                                const playPromise = audioElement.play();
+                                const playPromise = audio.play();
                                 if (playPromise) {
                                     playPromise.then(() => {
-                                        console.log(`✅ تم تشغيل صوت ${sound.name} بنجاح`);
                                         soundPlayed = true;
-                                        
-                                        // إيقاف الصوت بعد 3 ثواني كحد أقصى
-                                        setTimeout(() => {
-                                            if (audioElement && !audioElement.paused) {
-                                                audioElement.pause();
-                                            }
-                                        }, 3000);
-                                        
-                                    }).catch(e => {
-                                        console.log(`⚠️ فشل تشغيل ${sound.name}:`, e.message);
-                                    });
+                                        console.log(`✅ صوت ${soundId} يعمل`);
+                                        // إيقاف بعد ثانيتين
+                                        setTimeout(() => audio.pause(), 2000);
+                                    }).catch(() => {});
                                 }
-                                break; // خروج من الحلقة بعد أول محاولة ناجحة
+                                break;
                             }
-                        } catch (error) {
-                            console.log(`❌ خطأ في تشغيل ${sound.name}:`, error.message);
-                        }
-                    }
-                    
-                    if (!soundPlayed) {
-                        console.log('🔇 تم تجاهل جميع الأصوات - الوظيفة تعمل بدون صوت');
+                        } catch(e) {}
                     }
                 }
                 
                 // إعادة ضبط حالة اللعبة
                 if (gameEnded) {
                     gameEnded = false;
-                    const winnerScreen = document.getElementById('winner-screen');
-                    if (winnerScreen) winnerScreen.classList.remove('visible');
-                    
-                    const activeSection = document.getElementById('active-players-section');
-                    if (activeSection) activeSection.style.display = 'block';
-                    
-                    const eliminatedSection = document.getElementById('eliminated-section');
-                    if (eliminatedSection) eliminatedSection.style.display = 'block';
+                    try {
+                        document.getElementById('winner-screen').classList.remove('visible');
+                        document.getElementById('active-players-section').style.display = 'block';
+                        document.getElementById('eliminated-section').style.display = 'block';
+                    } catch(e) {}
                 }
                 
                 // إعادة اللاعب للعبة
@@ -1147,25 +1159,20 @@ if (player === "فريدة") {
                 activePlayers.push(playerName);
                 if (!playerShields.hasOwnProperty(playerName)) { playerShields[playerName] = 0; }
                 
-                // رسالة النجاح
-                if (!silent) {
-                    try {
-                        showToast(`تم إعادة ${playerName} للعبة! 🎮`);
-                    } catch (e) {
-                        console.log(`تم إعادة ${playerName} للعبة!`);
-                    }
-                }
+                // NO TOAST MESSAGE - تم إلغاء رسالة النجاح نهائياً
+                console.log(`✅ تم إرجاع ${playerName} بدون رسالة toast`);
                 
                 // إعادة تجهيز اللعبة
                 setupGame();
                 
-                // إيقاف نهائي للتأكيد
+                // إيقاف نهائي متعدد للتأكيد المطلق
                 setTimeout(() => {
-                    stopCountdown();
-                    console.log('🔐 إيقاف نهائي تأكيدي للعد التنازلي');
-                }, 200);
+                    for (let i = 0; i < 3; i++) {
+                        stopCountdown();
+                    }
+                    console.log('🔒 إيقاف نهائي مضاعف مطبق');
+                }, 500);
                 
-                console.log(`✅ تم إرجاع ${playerName} بنجاح مع إيقاف مضمون للعد`);
             } else {
                 console.log(`❌ اللاعب ${playerName} غير موجود في قائمة المقصيين`);
             }
@@ -1680,6 +1687,41 @@ if (player === "فريدة") {
             };
         });
 
+
+
+        // مراقب دائم لإيقاف أي عد تنازلي خاطئ
+        setInterval(() => {
+            // فحص دوري كل ثانية
+            const timerElement = document.getElementById('countdown-timer');
+            const countdownSound = document.getElementById('sound-countdown');
+            
+            // إذا كان فيه أكتر من لاعب واحد والعد شغال، أوقفه فوراً
+            if (activePlayers && activePlayers.length > 1) {
+                if (timerElement && timerElement.style.display !== 'none') {
+                    console.log('🚨 WATCHDOG: عد تنازلي خاطئ - إيقاف فوري');
+                    stopCountdown();
+                }
+                if (countdownSound && !countdownSound.paused) {
+                    console.log('🚨 WATCHDOG: صوت عد تنازلي خاطئ - إيقاف فوري');
+                    countdownSound.pause();
+                    countdownSound.currentTime = 0;
+                    countdownSound.volume = 0;
+                }
+            }
+            
+            // إزالة أي Toast messages متبقية
+            const toastElements = document.querySelectorAll('#toast, .toast, [class*="toast"]');
+            toastElements.forEach(toast => {
+                if (toast.classList.contains('show')) {
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                        toast.classList.remove('show');
+                        toast.textContent = '';
+                    }, 3000); // إزالة بعد 3 ثواني
+                }
+            });
+            
+        }, 1000); // فحص كل ثانية
 
     </script>
 </body>
