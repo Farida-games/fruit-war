@@ -820,19 +820,32 @@ body {
             updateGameInfo(); 
             updateEliminatedList();
             updateActivePlayersList();
-            if (activePlayers.length === 1 && !countdownInterval) {
+            // ✅ إضافة شرط !gameEnded لمنع بدء العد إذا انتهت اللعبة
+            if (activePlayers.length === 1 && !countdownInterval && !gameEnded) {
+                console.log('🔔 بدء العد التنازلي - لاعب واحد متبقي');
                 startCountdown();
             } else if (activePlayers.length <= 0) {
                 setTimeout(() => showWinner('لا يوجد فائز!'), 1000);
             }
         }
         function stopCountdown() {
+            console.log('🛑 إيقاف العد التنازلي');
             const countdownSound = document.getElementById('sound-countdown');
-            if (countdownSound) { countdownSound.pause(); countdownSound.currentTime = 0; }
-            countdownSound.load(); // إعادة تحميل العنصر - يوقف الـ loop نهائياً!
-            if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+            if (countdownSound) {
+                countdownSound.pause();
+                countdownSound.currentTime = 0;
+                countdownSound.load(); // إعادة تحميل لتوقيف الـ loop نهائياً
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+                console.log('✅ تم إلغاء interval العد التنازلي');
+            }
             const timerElement = document.getElementById('countdown-timer');
-            if (timerElement) timerElement.style.display = 'none';
+            if (timerElement) {
+                timerElement.style.display = 'none';
+                console.log('✅ تم إخفاء عنصر التايمر');
+            }
         }
         function startCountdown() {
             document.getElementById('sound-countdown')?.play();
@@ -957,10 +970,21 @@ if (player === "فريدة") {
         }
         
         function reAddPlayer(playerName, silent = false) {
+            console.log(`🔄 إرجاع اللاعب: ${playerName}`);
             if (eliminatedPlayers.includes(playerName)) {
-                stopCountdown(); // توقيف التايمر فوراً
-                if (!silent) document.getElementById('sound-re-add')?.play();
+                // 🎯 توقيف العد التنازلي فوراً
+                console.log('🛑 توقيف العد التنازلي قبل إرجاع اللاعب');
                 stopCountdown();
+                
+                // تشغيل صوت الإرجاع
+                if (!silent) {
+                    const returnSound = document.getElementById('sound-re-add');
+                    if (returnSound) {
+                        returnSound.play().catch(e => console.log('تعذر تشغيل صوت الإرجاع'));
+                    }
+                }
+                
+                // إعادة ضبط حالة اللعبة إذا انتهت
                 if (gameEnded) {
                     gameEnded = false;
                     document.getElementById('winner-screen').classList.remove('visible');
@@ -968,12 +992,14 @@ if (player === "فريدة") {
                     document.getElementById('eliminated-section').style.display = 'block';
                 }
                 
+                // إعادة اللاعب للعبة
                 eliminatedPlayers = eliminatedPlayers.filter(p => p !== playerName);
                 activePlayers.push(playerName);
                 if (!playerShields.hasOwnProperty(playerName)) { playerShields[playerName] = 0; }
                 if (!silent) showToast(`تم إعادة ${playerName} للعبة! 🎮`);
                 
                 setupGame();
+                console.log(`✅ تم إرجاع ${playerName} بنجاح`);
             }
         }
         function reAddOldestEliminatedPlayer() {
