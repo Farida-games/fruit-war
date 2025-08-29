@@ -820,7 +820,8 @@ body {
             updateGameInfo(); 
             updateEliminatedList();
             updateActivePlayersList();
-            if (activePlayers.length === 1 && !countdownInterval) {
+            // تحقق من أن اللعبة لم تنته وأنه لا يوجد عد تنازلي نشط
+            if (activePlayers.length === 1 && !countdownInterval && !gameEnded) {
                 startCountdown();
             } else if (activePlayers.length <= 0) {
                 setTimeout(() => showWinner('لا يوجد فائز!'), 1000);
