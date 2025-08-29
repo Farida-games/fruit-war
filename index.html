@@ -820,7 +820,7 @@ body {
             updateGameInfo(); 
             updateEliminatedList();
             updateActivePlayersList();
-            // تحقق من أن اللعبة لم تنته وأنه لا يوجد عد تنازلي نشط
+            // منع بدء العد التنازلي إذا كانت اللعبة قد انتهت أو إذا كان العد التنازلي نشطاً بالفعل
             if (activePlayers.length === 1 && !countdownInterval && !gameEnded) {
                 startCountdown();
             } else if (activePlayers.length <= 0) {
