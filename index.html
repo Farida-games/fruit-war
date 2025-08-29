@@ -817,162 +817,37 @@ body {
             }
         }
         function checkGameStatus() {
-            console.log('📊 SAFE CHECK - فحص آمن لحالة اللعبة');
-            console.log(`👥 لاعبين نشطين: ${activePlayers.length}, gameEnded: ${gameEnded}`);
-            
-            updateGameInfo();
+            updateGameInfo(); 
             updateEliminatedList();
             updateActivePlayersList();
-            
-            // فحص مشدد للشروط قبل بدء العد
-            const shouldStartCountdown = (
-                activePlayers.length === 1 &&
-                !countdownInterval &&
-                !gameEnded &&
-                !document.querySelector('#countdown-timer[style*="block"]') // التايمر مش ظاهر
-            );
-            
-            if (shouldStartCountdown) {
-                console.log('🚨 شروط بدء العد متوفرة - بدء startCountdown()');
-                console.log('⚠️ تأكيد: لاعب واحد فقط، لا يوجد عد حالي، اللعبة لم تنته');
+            if (activePlayers.length === 1 && !countdownInterval) {
                 startCountdown();
-            } else {
-                console.log('🛡️ منع بدء العد التنازلي:');
-                console.log(`   - لاعب واحد؟ ${activePlayers.length === 1}`);
-                console.log(`   - لا يوجد عد حالي؟ ${!countdownInterval}`);
-                console.log(`   - اللعبة لم تنته؟ ${!gameEnded}`);
-                
-                // إيقاف أي عد تنازلي خاطئ
-                if (countdownInterval) {
-                    console.log('⚠️ وجد عد تنازلي خاطئ - إيقافه');
-                    stopCountdown();
-                }
-            }
-            
-            if (activePlayers.length <= 0) {
-                console.log('😞 لا يوجد لاعبين - انتهاء اللعبة');
+            } else if (activePlayers.length <= 0) {
                 setTimeout(() => showWinner('لا يوجد فائز!'), 1000);
             }
         }
         function stopCountdown() {
-            console.log('🚨 RADICAL STOP - إيقاف راديكالي للعد التنازلي');
-            
-            // إيقاف راديكالي لجميع intervals الممكنة
-            try {
-                if (countdownInterval) {
-                    clearInterval(countdownInterval);
-                    countdownInterval = null;
-                }
-                
-                // إيقاف راديكالي لآلاف intervals
-                for (let i = 1; i < 50000; i++) {
-                    try { clearInterval(i); } catch(e) {}
-                }
-                
-                // إيقاف وتدمير جميع الأصوات المتعلقة بالعد التنازلي
-                const allAudios = document.querySelectorAll('audio');
-                allAudios.forEach(audio => {
-                    try {
-                        if (audio.id === 'sound-countdown' || audio.src.includes('countdown')) {
-                            audio.pause();
-                            audio.currentTime = 0;
-                            audio.volume = 0;
-                            audio.load();
-                            audio.muted = true;
-                            // تعطيل العنصر نهائياً
-                            audio.removeAttribute('src');
-                            audio.src = '';
-                            console.log('🔇 تم تدمير صوت العد التنازلي');
-                        }
-                    } catch(e) {}
-                });
-                
-                // إخفاء وتدمير عنصر التايمر
-                const timerElements = [
-                    document.getElementById('countdown-timer'),
-                    document.querySelector('#countdown-timer'),
-                    ...document.querySelectorAll('[id*="countdown"]'),
-                    ...document.querySelectorAll('[class*="countdown"]')
-                ];
-                
-                timerElements.forEach(element => {
-                    if (element) {
-                        element.style.display = 'none';
-                        element.style.visibility = 'hidden';
-                        element.textContent = '';
-                        element.innerHTML = '';
-                        element.remove(); // إزالة العنصر نهائياً
-                    }
-                });
-                
-                console.log('✅ تم التدمير الراديكالي للعد التنازلي');
-                
-            } catch (error) {
-                console.log('⚠️ خطأ في الإيقاف الراديكالي:', error);
-            }
+            const countdownSound = document.getElementById('sound-countdown');
+            if (countdownSound) { countdownSound.pause(); countdownSound.currentTime = 0; }
+            if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+            const timerElement = document.getElementById('countdown-timer');
+            if (timerElement) timerElement.style.display = 'none';
         }
         function startCountdown() {
-            console.log('🚨 PROTECTED START - بدء محمي للعد التنازلي');
-            
-            // فحص مشدد قبل البدء
-            if (countdownInterval) {
-                console.log('⚠️ يوجد عد تنازلي نشط - إيقافه أولاً');
-                clearInterval(countdownInterval);
-                countdownInterval = null;
-            }
-            
-            // فحص إضافي للحالة
-            if (gameEnded || activePlayers.length !== 1) {
-                console.log('❌ شروط العد التنازلي غير متوفرة - إلغاء البدء');
-                return;
-            }
-            
-            try {
-                const countdownSound = document.getElementById('sound-countdown');
-                if (countdownSound) {
-                    countdownSound.volume = 0.7;
-                    countdownSound.play().catch(e => {
-                        console.log('⚠️ تعذر تشغيل صوت العد التنازلي');
-                    });
-                }
-            } catch (e) {
-                console.log('⚠️ خطأ في تشغيل صوت العد التنازلي');
-            }
-            
+            document.getElementById('sound-countdown')?.play();
             let timeLeft = 20;
             const timerElement = document.getElementById('countdown-timer');
-            if (timerElement) {
-                timerElement.style.display = 'block';
-            }
-            
-            const updateTimer = () => {
-                if (timerElement) {
-                    timerElement.textContent = `⏰ ${timeLeft} ⏰`;
-                }
-            };
+            timerElement.style.display = 'block';
+            const updateTimer = () => { timerElement.textContent = `⏰ ${timeLeft} ⏰`; };
             updateTimer();
-            
-            console.log('🔔 بدء عد تنازلي محمي...');
             countdownInterval = setInterval(() => {
-                // فحص مستمر للحالة
-                if (gameEnded || activePlayers.length > 1) {
-                    console.log('🛑 تغيرت الحالة - إيقاف العد التنازلي');
-                    stopCountdown();
-                    return;
-                }
-                
-                timeLeft--;
-                updateTimer();
-                
+                timeLeft--; updateTimer();
                 if (timeLeft <= 0) {
-                    console.log('⏰ انتهى الوقت!');
                     stopCountdown();
-                    if (activePlayers.length === 1) {
-                        showWinner(activePlayers[0]);
-                    } else {
-                        showWinner('لا يوجد فائز!');
-                    }
+                    if (activePlayers.length === 1) showWinner(activePlayers[0]);
+                    else showWinner('لا يوجد فائز!');
                 }
+                if (activePlayers.length > 1) { stopCountdown(); }
             }, 1000);
         }
         function showEliminationPopup(message, title, type = 'elimination') {
@@ -1081,100 +956,22 @@ if (player === "فريدة") {
         }
         
         function reAddPlayer(playerName, silent = false) {
-            console.log(`🚨 RADICAL RE-ADD - إرجاع راديكالي للاعب: ${playerName}`);
-            
             if (eliminatedPlayers.includes(playerName)) {
-                // إيقاف راديكالي فوري متعدد
-                console.log('🛑 EMERGENCY RADICAL STOP - إيقاف طارئ راديكالي');
-                
-                // استدعاء stopCountdown عدة مرات للتأكيد
-                for (let i = 0; i < 5; i++) {
-                    setTimeout(() => stopCountdown(), i * 10);
-                }
-                
-                // إزالة فورية لجميع Toast messages
-                const toastElements = [
-                    document.getElementById('toast'),
-                    document.querySelector('#toast'),
-                    ...document.querySelectorAll('.toast'),
-                    ...document.querySelectorAll('[class*="toast"]'),
-                    ...document.querySelectorAll('[id*="toast"]')
-                ];
-                
-                toastElements.forEach(toast => {
-                    if (toast) {
-                        toast.style.display = 'none';
-                        toast.style.opacity = '0';
-                        toast.style.visibility = 'hidden';
-                        toast.classList.remove('show');
-                        toast.textContent = '';
-                        toast.innerHTML = '';
-                        console.log('🗑️ تم إزالة Toast message');
-                    }
-                });
-                
-                // تشغيل صوت الإرجاع بطريقة آمنة
-                if (!silent) {
-                    console.log('🔊 تشغيل صوت إرجاع آمن...');
-                    
-                    const soundOptions = ['sound-re-add', 'sound-click', 'sound-start'];
-                    let soundPlayed = false;
-                    
-                    for (const soundId of soundOptions) {
-                        if (soundPlayed) break;
-                        
-                        try {
-                            const audio = document.getElementById(soundId);
-                            if (audio && !soundPlayed) {
-                                audio.currentTime = 0;
-                                audio.volume = 0.6;
-                                
-                                const playPromise = audio.play();
-                                if (playPromise) {
-                                    playPromise.then(() => {
-                                        soundPlayed = true;
-                                        console.log(`✅ صوت ${soundId} يعمل`);
-                                        // إيقاف بعد ثانيتين
-                                        setTimeout(() => audio.pause(), 2000);
-                                    }).catch(() => {});
-                                }
-                                break;
-                            }
-                        } catch(e) {}
-                    }
-                }
-                
-                // إعادة ضبط حالة اللعبة
+                if (!silent) document.getElementById('sound-re-add')?.play();
+                stopCountdown();
                 if (gameEnded) {
                     gameEnded = false;
-                    try {
-                        document.getElementById('winner-screen').classList.remove('visible');
-                        document.getElementById('active-players-section').style.display = 'block';
-                        document.getElementById('eliminated-section').style.display = 'block';
-                    } catch(e) {}
+                    document.getElementById('winner-screen').classList.remove('visible');
+                    document.getElementById('active-players-section').style.display = 'block';
+                    document.getElementById('eliminated-section').style.display = 'block';
                 }
                 
-                // إعادة اللاعب للعبة
                 eliminatedPlayers = eliminatedPlayers.filter(p => p !== playerName);
                 activePlayers.push(playerName);
                 if (!playerShields.hasOwnProperty(playerName)) { playerShields[playerName] = 0; }
+                if (!silent) showToast(`تم إعادة ${playerName} للعبة! 🎮`);
                 
-                // NO TOAST MESSAGE - تم إلغاء رسالة النجاح نهائياً
-                console.log(`✅ تم إرجاع ${playerName} بدون رسالة toast`);
-                
-                // إعادة تجهيز اللعبة
                 setupGame();
-                
-                // إيقاف نهائي متعدد للتأكيد المطلق
-                setTimeout(() => {
-                    for (let i = 0; i < 3; i++) {
-                        stopCountdown();
-                    }
-                    console.log('🔒 إيقاف نهائي مضاعف مطبق');
-                }, 500);
-                
-            } else {
-                console.log(`❌ اللاعب ${playerName} غير موجود في قائمة المقصيين`);
             }
         }
         function reAddOldestEliminatedPlayer() {
@@ -1203,28 +1000,20 @@ if (player === "فريدة") {
             }
         }
         function updateBombControls() {
-            console.log('🔧 updateBombControls() - فحص آمن');
-            
-            try {
-                // تحقق من وجود العناصر المطلوبة
-                const bombButton = document.getElementById('btn-plant-bomb');
-                const bombExplodeButton = document.getElementById('btn-explode-bomb');
-                
-                // إذا العناصر مش موجودة، اخرج من الوظيفة
-                if (!bombButton || !bombExplodeButton) {
-                    console.log('⚠️ عناصر bomb controls غير موجودة - تجاهل التحديث');
-                    return;
-                }
-                
-                // تحديث العناصر بأمان
-                bombButton.disabled = !bombAvailableForPlanting;
-                bombExplodeButton.disabled = !bombExploded;
-                
-                console.log('✅ updateBombControls تمت بنجاح');
-                
-            } catch (error) {
-                console.error('❌ خطأ في updateBombControls:', error);
-                // لا تعيد استدعاء الوظيفة لمنع infinite loop
+            const bombControls = document.getElementById('bomb-controls');
+            const plantButton = document.getElementById('plant-bomb-btn');
+            const bombStatus = document.getElementById('bomb-status');
+            if (activePlayers.length < 6 && !bombExploded) {
+                bombControls.style.display = 'block';
+                plantButton.disabled = false;
+                bombStatus.textContent = '';
+                bombAvailableForPlanting = true;
+            } else if (bombExploded) {
+                bombControls.style.display = 'block';
+                plantButton.disabled = !bombAvailableForPlanting;
+                bombStatus.textContent = bombAvailableForPlanting ? 'القنبلة متاحة للزرع الآن!' : 'تم استخدام ميزة زرع القنبلة.';
+            } else {
+                bombControls.style.display = 'none';
             }
         }
         
@@ -1368,361 +1157,6 @@ if (player === "فريدة") {
                 randomImmunityEnabled = toggle.checked;
             }
         });
-
-
-        // ============================================
-        // نظام الصوت المحسن للتوافق مع iOS
-        // ============================================
-
-        class EnhancedAudioSystem {
-            constructor() {
-                this.audioContext = null;
-                this.audioBuffers = {};
-                this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                this.silentAudio = null;
-                this.audioInitialized = false;
-                this.soundEnabled = true;
-
-                this.init();
-            }
-
-            async init() {
-                // إنشاء AudioContext
-                try {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) {
-                    console.log('Web Audio API غير مدعوم، سيتم استخدام HTML5 Audio');
-                    return;
-                }
-
-                // تحضير الملف الصامت لـ iOS
-                if (this.isIOS) {
-                    this.createSilentAudio();
-                    this.showIOSNotification();
-                }
-
-                // تحميل جميع الأصوات
-                await this.loadAllSounds();
-
-                // إضافة مستمعات الأحداث
-                this.addEventListeners();
-            }
-
-            createSilentAudio() {
-                this.silentAudio = document.createElement('audio');
-                this.silentAudio.src = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAAFE=';
-                this.silentAudio.loop = true;
-                this.silentAudio.volume = 0.01;
-                this.silentAudio.load();
-            }
-
-            showIOSNotification() {
-                // إنشاء إشعار للمستخدمين iOS
-                const notification = document.createElement('div');
-                notification.id = 'ios-audio-notification';
-                notification.innerHTML = `
-                    <div style="position: fixed; top: 10px; right: 10px; background: rgba(255,193,7,0.95); 
-                                color: #000; padding: 15px; border-radius: 10px; z-index: 10000; 
-                                max-width: 300px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                                font-family: 'Changa', sans-serif; text-align: center;">
-                        <div style="font-size: 18px; margin-bottom: 10px;">🔊</div>
-                        <div style="font-size: 14px; margin-bottom: 10px;">
-                            للاستمتاع بالأصوات الكاملة:<br>
-                            • تأكد من إيقاف الوضع الصامت<br>
-                            • اضغط الزر أدناه لتفعيل الصوت
-                        </div>
-                        <button onclick="audioSystem.enableAudio()" 
-                                style="background: #28a745; color: white; border: none; 
-                                       padding: 8px 15px; border-radius: 5px; cursor: pointer;">
-                            تفعيل الصوت
-                        </button>
-                        <button onclick="this.parentElement.parentElement.remove()" 
-                                style="background: #dc3545; color: white; border: none; 
-                                       padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-right: 5px;">
-                            إغلاق
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(notification);
-            }
-
-            async enableAudio() {
-                if (this.isIOS && this.silentAudio) {
-                    try {
-                        await this.silentAudio.play();
-                        console.log('تم تفعيل قناة الصوت لـ iOS');
-                    } catch (e) {
-                        console.log('فشل في تشغيل الملف الصامت:', e);
-                    }
-                }
-
-                if (this.audioContext && this.audioContext.state === 'suspended') {
-                    await this.audioContext.resume();
-                }
-
-                this.audioInitialized = true;
-
-                // إزالة الإشعار
-                const notification = document.getElementById('ios-audio-notification');
-                if (notification) {
-                    notification.remove();
-                }
-
-                // عرض رسالة تأكيد
-                this.showMessage('تم تفعيل الصوت بنجاح! 🔊', 'success');
-            }
-
-            async loadAllSounds() {
-                const sounds = {
-                    'win': 'win.mp3',
-                    'start': 'gamestart.mp3',
-                    'click': 'squish.mp3',
-                    'elimination': 'exclusion.mp3',
-                    'bomb': 'bomb.mp3',
-                    'shield': 'protect.mp3',
-                    'countdown': 'countdown.mp3',
-                    'readd': 'return.mp3',
-                    'golden': 'golden.mp3',
-                    'generous': 'generous.mp3'
-                };
-
-                for (const [name, file] of Object.entries(sounds)) {
-                    try {
-                        await this.loadSound(name, file);
-                    } catch (e) {
-                        console.log(`فشل في تحميل صوت ${name}:`, e);
-                    }
-                }
-            }
-
-            async loadSound(name, url) {
-                try {
-                    const response = await fetch(url);
-                    const arrayBuffer = await response.arrayBuffer();
-                    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                    this.audioBuffers[name] = audioBuffer;
-                    console.log(`تم تحميل صوت ${name}`);
-                } catch (e) {
-                    console.log(`خطأ في تحميل ${name}:`, e);
-                }
-            }
-
-            addEventListeners() {
-                // إضافة مستمع للتفاعل الأول مع الصفحة
-                const enableAudioOnFirstClick = () => {
-                    this.enableAudio();
-                    document.removeEventListener('click', enableAudioOnFirstClick);
-                    document.removeEventListener('touchstart', enableAudioOnFirstClick);
-                };
-
-                document.addEventListener('click', enableAudioOnFirstClick, { once: true });
-                document.addEventListener('touchstart', enableAudioOnFirstClick, { once: true });
-            }
-
-            playSound(soundName, volume = 1.0) {
-                if (!this.soundEnabled) return;
-
-                // استخدام Web Audio API إذا كان متاحاً
-                if (this.audioContext && this.audioBuffers[soundName]) {
-                    this.playWithWebAudio(soundName, volume);
-                } else {
-                    // العودة لـ HTML5 Audio
-                    this.playWithHTML5Audio(soundName, volume);
-                }
-            }
-
-            playWithWebAudio(soundName, volume) {
-                try {
-                    if (this.audioContext.state === 'suspended') {
-                        this.audioContext.resume();
-                    }
-
-                    const source = this.audioContext.createBufferSource();
-                    const gainNode = this.audioContext.createGain();
-
-                    source.buffer = this.audioBuffers[soundName];
-                    gainNode.gain.value = volume;
-
-                    source.connect(gainNode);
-                    gainNode.connect(this.audioContext.destination);
-
-                    source.start(0);
-
-                    // خاص بـ iOS: تشغيل الملف الصامت في الخلفية
-                    if (this.isIOS && this.silentAudio && this.silentAudio.paused) {
-                        this.silentAudio.play().catch(e => console.log('Silent audio play failed:', e));
-                    }
-
-                } catch (e) {
-                    console.log(`خطأ في تشغيل ${soundName} بـ Web Audio:`, e);
-                    this.playWithHTML5Audio(soundName, volume);
-                }
-            }
-
-            playWithHTML5Audio(soundName, volume) {
-                try {
-                    const audioElement = document.getElementById(`sound-${soundName}`);
-                    if (audioElement) {
-                        audioElement.volume = volume;
-                        audioElement.play().catch(e => {
-                            console.log(`خطأ في تشغيل ${soundName}:`, e);
-                            if (this.isIOS) {
-                                this.showMessage('قم بتفعيل الصوت أولاً 🔊', 'warning');
-                            }
-                        });
-                    }
-                } catch (e) {
-                    console.log(`خطأ في HTML5 Audio لـ ${soundName}:`, e);
-                }
-            }
-
-            showMessage(text, type = 'info') {
-                const message = document.createElement('div');
-                const colors = {
-                    success: '#28a745',
-                    warning: '#ffc107',
-                    error: '#dc3545',
-                    info: '#17a2b8'
-                };
-
-                message.style.cssText = `
-                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    background: ${colors[type]}; color: white; padding: 15px 25px;
-                    border-radius: 10px; z-index: 10001; font-family: 'Changa', sans-serif;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center;
-                `;
-                message.textContent = text;
-
-                document.body.appendChild(message);
-                setTimeout(() => message.remove(), 3000);
-            }
-
-            toggleSound() {
-                this.soundEnabled = !this.soundEnabled;
-                this.showMessage(this.soundEnabled ? 'تم تشغيل الصوت 🔊' : 'تم كتم الصوت 🔇', 
-                               this.soundEnabled ? 'success' : 'warning');
-                return this.soundEnabled;
-            }
-        }
-
-        // إنشاء نظام الصوت المحسن
-        const audioSystem = new EnhancedAudioSystem();
-
-        // تحديث الدوال الموجودة لاستخدام النظام الجديد
-        const originalShowWinner = showWinner;
-        showWinner = function(winnerName) {
-            audioSystem.playSound('win', 0.8);
-            return originalShowWinner(winnerName);
-        };
-
-        // إضافة زر التحكم بالصوت بجانب الحصانة العشوائية
-        document.addEventListener('DOMContentLoaded', function() {
-            const soundToggle = document.createElement('button');
-            soundToggle.innerHTML = '🔊';
-            soundToggle.style.cssText = `
-                background: rgba(231, 76, 60, 0.9);
-                color: white;
-                border: none;
-                width: 45px;
-                height: 45px;
-                border-radius: 50%;
-                font-size: 18px;
-                cursor: pointer;
-                box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-                transition: all 0.3s ease;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                margin-left: 15px;
-                vertical-align: middle;
-            `;
-
-            // إضافة تأثيرات التفاعل
-            soundToggle.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.1)';
-                this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.4)';
-            });
-
-            soundToggle.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-                this.style.boxShadow = '0 3px 10px rgba(0,0,0,0.3)';
-            });
-
-            soundToggle.onclick = function() {
-                const enabled = audioSystem.toggleSound();
-                this.innerHTML = enabled ? '🔊' : '🔇';
-                // تغيير لون الخلفية حسب الحالة
-                this.style.backgroundColor = enabled ? 
-                    'rgba(46, 204, 113, 0.9)' : 'rgba(231, 76, 60, 0.9)';
-            };
-
-            // إضافة الزر بجانب حاوي الحصانة العشوائية (مع مسافة)
-            const gameInfo = document.querySelector('.game-info');
-            const immunityContainer = document.querySelector('.immunity-toggle-container');
-
-            if (gameInfo && immunityContainer) {
-                // إدراج الزر مباشرة بعد immunity-toggle-container
-                immunityContainer.insertAdjacentElement('afterend', soundToggle);
-            } else {
-                // إضافة احتياطية إذا لم يتم العثور على الحاوي
-                document.body.appendChild(soundToggle);
-            }
-        });
-
-        // تحديث جميع استدعاءات تشغيل الأصوات الأخرى
-        document.addEventListener('DOMContentLoaded', function() {
-            // استبدال جميع استدعاءات play() القديمة
-            const originalGetElementById = document.getElementById;
-            document.getElementById = function(id) {
-                const element = originalGetElementById.call(this, id);
-                if (element && element.tagName === 'AUDIO') {
-                    const originalPlay = element.play;
-                    element.play = function() {
-                        const soundName = id.replace('sound-', '');
-                        audioSystem.playSound(soundName);
-                        return Promise.resolve();
-                    };
-                }
-                return element;
-            };
-        });
-
-
-
-        // مراقب دائم لإيقاف أي عد تنازلي خاطئ
-        setInterval(() => {
-            // فحص دوري كل ثانية
-            const timerElement = document.getElementById('countdown-timer');
-            const countdownSound = document.getElementById('sound-countdown');
-            
-            // إذا كان فيه أكتر من لاعب واحد والعد شغال، أوقفه فوراً
-            if (activePlayers && activePlayers.length > 1) {
-                if (timerElement && timerElement.style.display !== 'none') {
-                    console.log('🚨 WATCHDOG: عد تنازلي خاطئ - إيقاف فوري');
-                    stopCountdown();
-                }
-                if (countdownSound && !countdownSound.paused) {
-                    console.log('🚨 WATCHDOG: صوت عد تنازلي خاطئ - إيقاف فوري');
-                    countdownSound.pause();
-                    countdownSound.currentTime = 0;
-                    countdownSound.volume = 0;
-                }
-            }
-            
-            // إزالة أي Toast messages متبقية
-            const toastElements = document.querySelectorAll('#toast, .toast, [class*="toast"]');
-            toastElements.forEach(toast => {
-                if (toast.classList.contains('show')) {
-                    setTimeout(() => {
-                        toast.style.display = 'none';
-                        toast.classList.remove('show');
-                        toast.textContent = '';
-                    }, 3000); // إزالة بعد 3 ثواني
-                }
-            });
-            
-        }, 1000); // فحص كل ثانية
-
-    </script>
+</script>
 </body>
 </html>
