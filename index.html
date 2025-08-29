@@ -817,83 +817,143 @@ body {
             }
         }
         function checkGameStatus() {
-            console.log('📊 checkGameStatus() - فحص حالة اللعبة');
-            console.log(`👥 لاعبين نشطين: ${activePlayers.length}, interval: ${countdownInterval ? 'يعمل' : 'متوقف'}, gameEnded: ${gameEnded}`);
+            console.log('📊 SAFE CHECK - فحص آمن لحالة اللعبة');
+            console.log(`👥 لاعبين نشطين: ${activePlayers.length}, gameEnded: ${gameEnded}`);
             
             updateGameInfo();
             updateEliminatedList();
             updateActivePlayersList();
             
-            // ✅ إضافة شرط !gameEnded لمنع بدء العد إذا انتهت اللعبة
-            if (activePlayers.length === 1 && !countdownInterval && !gameEnded) {
-                console.log('🚨 بدء العد التنازلي - لاعب واحد متبقي');
+            // فحص مشدد للشروط قبل بدء العد
+            const shouldStartCountdown = (
+                activePlayers.length === 1 &&
+                !countdownInterval &&
+                !gameEnded &&
+                !document.querySelector('#countdown-timer[style*="block"]') // التايمر مش ظاهر
+            );
+            
+            if (shouldStartCountdown) {
+                console.log('🚨 شروط بدء العد متوفرة - بدء startCountdown()');
+                console.log('⚠️ تأكيد: لاعب واحد فقط، لا يوجد عد حالي، اللعبة لم تنته');
                 startCountdown();
-            } else if (activePlayers.length <= 0) {
+            } else {
+                console.log('🛡️ منع بدء العد التنازلي:');
+                console.log(`   - لاعب واحد؟ ${activePlayers.length === 1}`);
+                console.log(`   - لا يوجد عد حالي؟ ${!countdownInterval}`);
+                console.log(`   - اللعبة لم تنته؟ ${!gameEnded}`);
+                
+                // إيقاف أي عد تنازلي خاطئ
+                if (countdownInterval) {
+                    console.log('⚠️ وجد عد تنازلي خاطئ - إيقافه');
+                    stopCountdown();
+                }
+            }
+            
+            if (activePlayers.length <= 0) {
                 console.log('😞 لا يوجد لاعبين - انتهاء اللعبة');
                 setTimeout(() => showWinner('لا يوجد فائز!'), 1000);
-            } else {
-                console.log('ℹ️ لا حاجة لبدء العد التنازلي');
             }
         }
         function stopCountdown() {
-            console.log('🛑 إيقاف العد التنازلي');
+            console.log('🛑 FORCE STOP - إيقاف قسري للعد التنازلي');
             
+            // إيقاف جميع intervals الممكنة (حل جذري)
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+                console.log('✅ تم إلغاء countdownInterval الأساسي');
+            }
+            
+            // إيقاف أي intervals إضافية محتملة
+            for (let i = 1; i < 10000; i++) {
+                clearInterval(i);
+            }
+            
+            // إيقاف الصوت بقوة
             const countdownSound = document.getElementById('sound-countdown');
             if (countdownSound) {
                 countdownSound.pause();
                 countdownSound.currentTime = 0;
-                countdownSound.load(); // إعادة تحميل لتوقيف الـ loop نهائياً
-                console.log('🔇 تم إيقاف صوت العد التنازلي');
+                countdownSound.load();
+                countdownSound.volume = 0;  // كتم الصوت أيضاً
+                console.log('🔇 تم إيقاف وكتم صوت العد التنازلي بالقوة');
             }
             
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-                countdownInterval = null;
-                console.log('✅ تم إلغاء countdownInterval');
-            }
-            
+            // إخفاء التايمر
             const timerElement = document.getElementById('countdown-timer');
             if (timerElement) {
                 timerElement.style.display = 'none';
-                console.log('👁️ تم إخفاء عنصر التايمر');
+                timerElement.textContent = '';
+                console.log('👁️ تم إخفاء ومسح محتوى التايمر');
             }
+            
+            // تأكيد الإيقاف
+            setTimeout(() => {
+                if (countdownSound) countdownSound.pause();
+                console.log('🔒 تأكيد نهائي - العد التنازلي متوقف');
+            }, 100);
         }
         function startCountdown() {
-            console.log('🚨 startCountdown() - بدء العد التنازلي');
+            console.log('🚨 PROTECTED START - بدء محمي للعد التنازلي');
             
-            // إذا كان هناك countdown يعمل بالفعل، أوقفه أولاً
+            // فحص مشدد قبل البدء
             if (countdownInterval) {
-                console.log('⚠️ يوجد countdown يعمل بالفعل - إيقافه أولاً');
+                console.log('⚠️ يوجد عد تنازلي نشط - إيقافه أولاً');
                 clearInterval(countdownInterval);
                 countdownInterval = null;
             }
             
+            // فحص إضافي للحالة
+            if (gameEnded || activePlayers.length !== 1) {
+                console.log('❌ شروط العد التنازلي غير متوفرة - إلغاء البدء');
+                return;
+            }
+            
             try {
-                document.getElementById('sound-countdown')?.play();
+                const countdownSound = document.getElementById('sound-countdown');
+                if (countdownSound) {
+                    countdownSound.volume = 0.7;
+                    countdownSound.play().catch(e => {
+                        console.log('⚠️ تعذر تشغيل صوت العد التنازلي');
+                    });
+                }
             } catch (e) {
-                console.log('⚠️ تعذر تشغيل صوت العد التنازلي');
+                console.log('⚠️ خطأ في تشغيل صوت العد التنازلي');
             }
             
             let timeLeft = 20;
             const timerElement = document.getElementById('countdown-timer');
-            timerElement.style.display = 'block';
-            const updateTimer = () => { timerElement.textContent = `⏰ ${timeLeft} ⏰`; };
+            if (timerElement) {
+                timerElement.style.display = 'block';
+            }
+            
+            const updateTimer = () => {
+                if (timerElement) {
+                    timerElement.textContent = `⏰ ${timeLeft} ⏰`;
+                }
+            };
             updateTimer();
             
-            console.log('🔔 بدء عد تنازلي جديد...');
+            console.log('🔔 بدء عد تنازلي محمي...');
             countdownInterval = setInterval(() => {
+                // فحص مستمر للحالة
+                if (gameEnded || activePlayers.length > 1) {
+                    console.log('🛑 تغيرت الحالة - إيقاف العد التنازلي');
+                    stopCountdown();
+                    return;
+                }
+                
                 timeLeft--;
                 updateTimer();
                 
                 if (timeLeft <= 0) {
                     console.log('⏰ انتهى الوقت!');
                     stopCountdown();
-                    if (activePlayers.length === 1) showWinner(activePlayers[0]);
-                    else showWinner('لا يوجد فائز!');
-                }
-                if (activePlayers.length > 1) {
-                    console.log('👥 أكثر من لاعب - إيقاف العد');
-                    stopCountdown();
+                    if (activePlayers.length === 1) {
+                        showWinner(activePlayers[0]);
+                    } else {
+                        showWinner('لا يوجد فائز!');
+                    }
                 }
             }, 1000);
         }
@@ -1003,39 +1063,109 @@ if (player === "فريدة") {
         }
         
         function reAddPlayer(playerName, silent = false) {
-            console.log(`🔄 إرجاع اللاعب: ${playerName}`);
+            console.log(`🔄 FORCE RE-ADD - إرجاع قسري للاعب: ${playerName}`);
             
             if (eliminatedPlayers.includes(playerName)) {
-                // 🎯 توقيف العد التنازلي فوراً قبل أي شيء آخر
-                console.log('🛑 توقيف العد التنازلي قبل إرجاع اللاعب');
+                // 🎯 إيقاف قسري فوري للعد التنازلي
+                console.log('🚨 EMERGENCY STOP - إيقاف طارئ للعد التنازلي');
                 stopCountdown();
                 
-                // تشغيل صوت الإرجاع
+                // إيقاف إضافي للتأكيد
+                setTimeout(() => {
+                    stopCountdown();
+                    console.log('🔒 إيقاف تأكيدي ثاني');
+                }, 50);
+                
+                // تشغيل صوت الإرجاع بطريقة آمنة
                 if (!silent) {
-                    const returnSound = document.getElementById('sound-re-add');
-                    if (returnSound) {
-                        returnSound.play().catch(e => {
-                            console.log('⚠️ تعذر تشغيل صوت الإرجاع (لا يؤثر على عمل الوظيفة)');
-                        });
+                    console.log('🔊 محاولة تشغيل صوت الإرجاع بأمان...');
+                    
+                    // استراتيجية متعددة الطبقات لتشغيل الصوت
+                    const soundAttempts = [
+                        { id: 'sound-re-add', name: 'return' },
+                        { id: 'sound-click', name: 'click' },
+                        { id: 'sound-start', name: 'start' },
+                        { id: 'sound-shield', name: 'shield' }
+                    ];
+                    
+                    let soundPlayed = false;
+                    for (const sound of soundAttempts) {
+                        if (soundPlayed) break;
+                        
+                        try {
+                            const audioElement = document.getElementById(sound.id);
+                            if (audioElement && !soundPlayed) {
+                                // إعدادات آمنة للصوت
+                                audioElement.currentTime = 0;
+                                audioElement.volume = 0.6;
+                                
+                                // تشغيل محدود بوقت لمنع infinite loop
+                                const playPromise = audioElement.play();
+                                if (playPromise) {
+                                    playPromise.then(() => {
+                                        console.log(`✅ تم تشغيل صوت ${sound.name} بنجاح`);
+                                        soundPlayed = true;
+                                        
+                                        // إيقاف الصوت بعد 3 ثواني كحد أقصى
+                                        setTimeout(() => {
+                                            if (audioElement && !audioElement.paused) {
+                                                audioElement.pause();
+                                            }
+                                        }, 3000);
+                                        
+                                    }).catch(e => {
+                                        console.log(`⚠️ فشل تشغيل ${sound.name}:`, e.message);
+                                    });
+                                }
+                                break; // خروج من الحلقة بعد أول محاولة ناجحة
+                            }
+                        } catch (error) {
+                            console.log(`❌ خطأ في تشغيل ${sound.name}:`, error.message);
+                        }
+                    }
+                    
+                    if (!soundPlayed) {
+                        console.log('🔇 تم تجاهل جميع الأصوات - الوظيفة تعمل بدون صوت');
                     }
                 }
                 
-                // إعادة ضبط حالة اللعبة إذا انتهت
+                // إعادة ضبط حالة اللعبة
                 if (gameEnded) {
                     gameEnded = false;
-                    document.getElementById('winner-screen').classList.remove('visible');
-                    document.getElementById('active-players-section').style.display = 'block';
-                    document.getElementById('eliminated-section').style.display = 'block';
+                    const winnerScreen = document.getElementById('winner-screen');
+                    if (winnerScreen) winnerScreen.classList.remove('visible');
+                    
+                    const activeSection = document.getElementById('active-players-section');
+                    if (activeSection) activeSection.style.display = 'block';
+                    
+                    const eliminatedSection = document.getElementById('eliminated-section');
+                    if (eliminatedSection) eliminatedSection.style.display = 'block';
                 }
                 
                 // إعادة اللاعب للعبة
                 eliminatedPlayers = eliminatedPlayers.filter(p => p !== playerName);
                 activePlayers.push(playerName);
                 if (!playerShields.hasOwnProperty(playerName)) { playerShields[playerName] = 0; }
-                if (!silent) showToast(`تم إعادة ${playerName} للعبة! 🎮`);
                 
+                // رسالة النجاح
+                if (!silent) {
+                    try {
+                        showToast(`تم إعادة ${playerName} للعبة! 🎮`);
+                    } catch (e) {
+                        console.log(`تم إعادة ${playerName} للعبة!`);
+                    }
+                }
+                
+                // إعادة تجهيز اللعبة
                 setupGame();
-                console.log(`✅ تم إرجاع ${playerName} بنجاح`);
+                
+                // إيقاف نهائي للتأكيد
+                setTimeout(() => {
+                    stopCountdown();
+                    console.log('🔐 إيقاف نهائي تأكيدي للعد التنازلي');
+                }, 200);
+                
+                console.log(`✅ تم إرجاع ${playerName} بنجاح مع إيقاف مضمون للعد`);
             } else {
                 console.log(`❌ اللاعب ${playerName} غير موجود في قائمة المقصيين`);
             }
